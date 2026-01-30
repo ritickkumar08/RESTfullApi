@@ -22,7 +22,7 @@ app.use(express.json());  //to change the coming data into json format so that w
 // Status code
 // Time taken
 app.use((req,res,next) =>{ //app.use registers global middleware
-    const start = Date.now.  //gives current time in milliseconds
+    const start = Date.now()  //gives current time in milliseconds
 
     res.on('finish', ()=>{
         const duration = Date.now() - start;
@@ -34,7 +34,7 @@ app.use((req,res,next) =>{ //app.use registers global middleware
 
 /* -------------------- Validation Middleware (15 marks) -------------------- */
 function validateUser(req, res, next){
-    const {id, firstName, lastName, hobby} = rq.body;
+    const {firstName, lastName, hobby} = req.body;
 
     if(!firstName || !lastName || !hobby){
         return res.status(400).json({message: "All fields (firstName, lastName, hobby) are required"})
@@ -62,6 +62,7 @@ app.get('/users/:id', (req,res)=>{
 
 //3. POST /user – Add a new user.
 app.post('/user', validateUser, (req,res) =>{
+    const {firstName, lastName, hobby } = req.body;
     const existingUser = users.find((user) => user.id === req.body.id)
 
     if(existingUser){
@@ -80,10 +81,10 @@ app.post('/user', validateUser, (req,res) =>{
 
 //4. PUT /user/:id – Update details of an existing user.
 app.put('/user/:id', validateUser, (req,res) =>{
+    const { firstName, lastName, hobby } = req.body;
     const index = users.findIndex((user) => user.id === req.params.id)
-    console.log(index);
+    // console.log(index);
     
-
     if(index === -1){
         return res.status(404).json({message: "user doesn't exists in the System"})
     }
