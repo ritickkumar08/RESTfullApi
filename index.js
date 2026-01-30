@@ -12,6 +12,24 @@ let users = [
   },
 ];
 
+/* -------------------- Built-in middleware -------------------- */
+app.use(express.json());  //to change the coming data into json format so that when the values are accessed we don't get undefined.
+
+/* -------------------- Logging middleware -------------------- */
+//runs for every incoming requests and logs the details about an API 
+// HTTP method
+// URL
+// Status code
+// Time taken
+app.use((req,res,next) =>{ //app.use registers global middleware
+    const start = Date.now.  //gives current time in milliseconds
+
+    res.on('finish', ()=>{
+        const duration = Date.now() - start;
+        console.log(`${req.method} ${req.originalUrl} ${res.statusCode} - ${duration}ms`);
+    })//finish fires when the response is fully sent
+})
+
 
 // 1.GET /users – Fetch the list of all users.
 app.get('/users', (req,res) =>{
@@ -29,6 +47,49 @@ app.get('/users/:id', (req,res)=>{
     res.status(200).json(userInfo)// if the user exists we return its information.
 })
 
+
+//3. POST /user – Add a new user.
+app.post('/user', (req,res) =>{
+    const existingUser = users.find((user) => user.id === req.body.id)
+
+    if(existingUser){
+        return res.status(400).json({message: "user already exists"})
+    }
+
+    users.push(req.body)
+    res.status(201).json({message : "New user registered"})
+})
+
+//4. PUT /user/:id – Update details of an existing user.
+app.put('/user/:id', (req,res) =>{
+    const index = users.findIndex((user) => user.id === req.params.id)
+    console.log(index);
+    
+
+    if(index === -1){
+        return res.status(404).json({message: "user doesn't exists in the System"})
+    }
+
+    users[index] = {...users[index],
+                    firstName,
+                    lastName,
+                    hobby,
+                }
+
+    res.status(200).json({message: `the user ${users[index].firstName} is updated, successfully!`})
+})
+
+//5. DELETE /user/:id – Delete a user by ID.
+app.delete('/user/:id', (req, res) => {
+    const index = users.findIndex((user) => user.id === req.params.id)
+
+    if(index === -1){
+        return res.status(404).json({message: "user doesn't exists in the System"})
+    }
+
+    users.splice(index, 1)
+    res.status(200).json({ message: `User deleted successfully` })
+})
 
 
 app.listen(PORT, ()=>{

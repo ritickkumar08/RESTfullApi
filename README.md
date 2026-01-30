@@ -10,3 +10,5 @@ now we will start to design the API for different purpose :-
         res- to send a response when the API is hit by a user  
             it sends a status - which is for machines so it must be accurate.
             and message is for human which are secondary.
+    2:- // 2.GET /users/:id – Fetch details of a specific user by ID.
+        an API that takes id in url and returns the user with same id.
