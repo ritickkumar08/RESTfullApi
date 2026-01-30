@@ -28,8 +28,20 @@ app.use((req,res,next) =>{ //app.use registers global middleware
         const duration = Date.now() - start;
         console.log(`${req.method} ${req.originalUrl} ${res.statusCode} - ${duration}ms`);
     })//finish fires when the response is fully sent
+
+    next() //Next middleware
 })
 
+/* -------------------- Validation Middleware (15 marks) -------------------- */
+function validateUser(req, res, next){
+    const {id, firstName, lastName, hobby} = rq.body;
+
+    if(!firstName || !lastName || !hobby){
+        return res.status(400).json({message: "All fields (firstName, lastName, hobby) are required"})
+    }
+
+    next() //Next middleware, if any or tho the control
+}
 
 // 1.GET /users – Fetch the list of all users.
 app.get('/users', (req,res) =>{
@@ -49,19 +61,25 @@ app.get('/users/:id', (req,res)=>{
 
 
 //3. POST /user – Add a new user.
-app.post('/user', (req,res) =>{
+app.post('/user', validateUser, (req,res) =>{
     const existingUser = users.find((user) => user.id === req.body.id)
 
     if(existingUser){
         return res.status(400).json({message: "user already exists"})
     }
+    const newUser = {
+        id: (users.length + 1).toString(),
+        firstName,
+        lastName,
+        hobby
+    }
 
-    users.push(req.body)
+    users.push(newUser)
     res.status(201).json({message : "New user registered"})
 })
 
 //4. PUT /user/:id – Update details of an existing user.
-app.put('/user/:id', (req,res) =>{
+app.put('/user/:id', validateUser, (req,res) =>{
     const index = users.findIndex((user) => user.id === req.params.id)
     console.log(index);
     
@@ -91,6 +109,12 @@ app.delete('/user/:id', (req, res) => {
     res.status(200).json({ message: `User deleted successfully` })
 })
 
+/* -------------------- Global Error Handler (10 marks) -------------------- */
+//This middleware handles errors. that are not because of the users but something broke internally
+app.use((err,req,res,next)=>{
+    console.error(err.stack);
+    res.status(500).json({ error: "Internal Server Error" });
+})
 
 app.listen(PORT, ()=>{
     console.log(`server listening on the port ${PORT}`);
